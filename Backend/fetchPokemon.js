@@ -1,10 +1,13 @@
+const API_URL = "http://localhost:5000/api/pkmn";
+const TOKEN = "eyJhbGciOiJIUzI1..."; // Remplacez par votre token !
+
 function fetchPokemonWithDelay(i) {
     setTimeout(() => {
         fetch(`https://pokeapi.co/api/v2/pokemon/${i+1}`)
             .then(response => response.json())
             .then(data => {
                 const types = data.types.map(type => type.type.name);
-                const imagePath = data.sprites.other["official-artwork"].front_default; // Image haute qualité
+                const imagePath = data.sprites.other["official-artwork"].front_default;
                 
                 // Récupération des statistiques
                 const hp = data.stats.find(stat => stat.stat.name === 'hp').base_stat;
@@ -15,11 +18,11 @@ function fetchPokemonWithDelay(i) {
                 const speed = data.stats.find(stat => stat.stat.name === 'speed').base_stat;
                 
                 // Nouvelles informations
-                const weight = data.weight; // Poids en hectogrammes
-                const height = data.height; // Taille en décimètres
-                const moves = data.moves.map(move => move.move.name); // Liste des capacités
-                const abilities = data.abilities.map(ability => ability.ability.name); // Capacités spéciales
-                const cri = data.cries?.latest || ""; // Cri du Pokémon
+                const weight = data.weight;
+                const height = data.height;
+                const moves = data.moves.map(move => move.move.name);
+                const abilities = data.abilities.map(ability => ability.ability.name);
+                const cri = data.cries?.latest || "";
 
                 fetch(`https://pokeapi.co/api/v2/pokemon-species/${i+1}`)
                     .then(response => response.json())
@@ -65,11 +68,11 @@ function fetchPokemonWithDelay(i) {
 
                         const myHeaders = new Headers();
                         myHeaders.append("Content-Type", "application/json");
-                        myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2FkYTRkNzE2OWZmMjJhYmM4ZGFlYTUiLCJ1c2VybmFtZSI6IkFzaCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczOTUyODM0OH0.EmQHtqwnQbGGhyQdRuwsBYwLs0p6_7_0q5TfWQwAOpc");
+                        myHeaders.append("Authorization", `Bearer ${TOKEN}`);
                         
                         const raw = JSON.stringify({
                             "name": name,
-                            "nationalDexId": nationalDexId, // ✅ Ajout du National Dex ID
+                            "nationalDexId": nationalDexId,
                             "types": types,
                             "regions": regionWithIndex,
                             "hp": hp,
@@ -94,7 +97,7 @@ function fetchPokemonWithDelay(i) {
                             redirect: "follow"
                         };
                         
-                        fetch("http://localhost:3000/api/pkmn/create", requestOptions)
+                        fetch("API_URL", requestOptions)
                             .then(response => response.text())
                             .then(result => console.log(`✅ ${name} ajouté avec NationalDexID: ${nationalDexId}`))
                             .catch(error => console.error(`❌ Erreur pour ${name} :`, error));
