@@ -46,9 +46,6 @@ const markPokemon = async (username, pkmnID, isCaptured) => {
     const trainer = await Trainer.findOne({ username });
     if (!trainer) throw new Error("Dresseur non trouvé.");
 
-    const pokemon = await Pokemon.findById(pkmnID);
-    if (!pokemon) throw new Error("Pokémon non trouvé.");
-
     if (isCaptured) {
         if (!trainer.pkmnCatch.includes(pkmnID)) {
             trainer.pkmnCatch.push(pkmnID);

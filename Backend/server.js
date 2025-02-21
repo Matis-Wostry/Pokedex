@@ -7,6 +7,15 @@ const trainerRoutes = require("./src/routes/trainerRoutes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 require("dotenv").config();
+const cors = require("cors");
+const app = express();
+
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:8081", "exp://192.168.1.29:8081"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 const PORT = process.env.PORT;
 const MONGO_URI = process.env.MONGO_URI;
@@ -33,7 +42,7 @@ const swaggerOptions = {
         },
         security: [{ bearerAuth: [] }],
     },
-    apis: ["./src/routes/*.js"], // Fichiers où Swagger va chercher les routes
+    apis: ["./src/routes/*.js"],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
@@ -42,7 +51,7 @@ mongoose.connect(MONGO_URI)
 .then(() => console.log("✅ Connecté à MongoDB"))
 .catch((err) => console.error("❌ Erreur de connexion à MongoDB :", err));
 
-const app = express();
+
 
 app.use(express.json()); 
 app.use("/medias", express.static("src/medias"));

@@ -4,7 +4,7 @@ function fetchPokemonWithDelay(i) {
             .then(response => response.json())
             .then(data => {
                 const types = data.types.map(type => type.type.name);
-                const imagePath = data.sprites.front_default;
+                const imagePath = data.sprites.other["official-artwork"].front_default; // Image haute qualité
                 
                 // Récupération des statistiques
                 const hp = data.stats.find(stat => stat.stat.name === 'hp').base_stat;
@@ -14,6 +14,13 @@ function fetchPokemonWithDelay(i) {
                 const specialDefense = data.stats.find(stat => stat.stat.name === 'special-defense').base_stat;
                 const speed = data.stats.find(stat => stat.stat.name === 'speed').base_stat;
                 
+                // Nouvelles informations
+                const weight = data.weight; // Poids en hectogrammes
+                const height = data.height; // Taille en décimètres
+                const moves = data.moves.map(move => move.move.name); // Liste des capacités
+                const abilities = data.abilities.map(ability => ability.ability.name); // Capacités spéciales
+                const cri = data.cries?.latest || ""; // Cri du Pokémon
+
                 fetch(`https://pokeapi.co/api/v2/pokemon-species/${i+1}`)
                     .then(response => response.json())
                     .then(data2 => {
@@ -22,6 +29,14 @@ function fetchPokemonWithDelay(i) {
                         const nameEntry = data2.names.find(entry => entry.language.name === 'fr');
                         const name = nameEntry ? nameEntry.name : data.name;
                         
+                        // 🔥 **Ajout du National Dex ID**
+                        const nationalDexEntry = data2.pokedex_numbers.find(entry => entry.pokedex.name === "national");
+                        const nationalDexId = nationalDexEntry ? nationalDexEntry.entry_number : null;
+
+                        if (!nationalDexId) {
+                            console.warn(`⚠️ Pas de National Dex ID pour ${name}`);
+                        }
+
                         // Détection des régions
                         const game_indices = data.game_indices;
                         const regions = {
@@ -47,13 +62,14 @@ function fetchPokemonWithDelay(i) {
                             const gameIndex = game_indices.find(game => regions[game.version.name] === region)?.game_index || 0;
                             return { regionName: region, regionPokedexNumber: gameIndex };
                         });
-                        
+
                         const myHeaders = new Headers();
                         myHeaders.append("Content-Type", "application/json");
                         myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2FkYTRkNzE2OWZmMjJhYmM4ZGFlYTUiLCJ1c2VybmFtZSI6IkFzaCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTczOTUyODM0OH0.EmQHtqwnQbGGhyQdRuwsBYwLs0p6_7_0q5TfWQwAOpc");
                         
                         const raw = JSON.stringify({
                             "name": name,
+                            "nationalDexId": nationalDexId, // ✅ Ajout du National Dex ID
                             "types": types,
                             "regions": regionWithIndex,
                             "hp": hp,
@@ -63,7 +79,12 @@ function fetchPokemonWithDelay(i) {
                             "specialDefense": specialDefense,
                             "speed": speed,
                             "description": description,
-                            "image": imagePath
+                            "image": imagePath,
+                            "weight": weight,
+                            "height": height,
+                            "moves": moves,
+                            "abilities": abilities,
+                            "cri": cri
                         });
                         
                         const requestOptions = {
@@ -75,15 +96,16 @@ function fetchPokemonWithDelay(i) {
                         
                         fetch("http://localhost:3000/api/pkmn/create", requestOptions)
                             .then(response => response.text())
-                            .then(result => console.log(result))
-                            .catch(error => console.error(error));
+                            .then(result => console.log(`✅ ${name} ajouté avec NationalDexID: ${nationalDexId}`))
+                            .catch(error => console.error(`❌ Erreur pour ${name} :`, error));
                     })
-                    .catch(error => console.error(error));
+                    .catch(error => console.error("❌ Erreur lors de la récupération des espèces :", error));
             })
-            .catch(error => console.error(error));
+            .catch(error => console.error("❌ Erreur lors de la récupération du Pokémon :", error));
     }, i * 200);
 }
 
+// Lancer l'insertion pour les 1025 Pokémon
 for (let i = 0; i < 1025; i++) {
     fetchPokemonWithDelay(i);
 }

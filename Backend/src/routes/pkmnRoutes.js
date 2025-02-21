@@ -2,14 +2,13 @@
  * @swagger
  * tags:
  *   name: Pokemon
- *   description: Gestion des Pokémon
+ *   description: Gestion des Pokémon avec toutes leurs caractéristiques.
  */
 const express = require("express");
 const router = express.Router();
 const pkmnController = require("../controllers/pkmnController");
 const { authenticate } = require("../middlewares/authMiddleware");
 const { authorize } = require("../middlewares/permissionMiddleware");
-
 
 router.get("/types", pkmnController.getTypes);
 
@@ -24,32 +23,34 @@ router.get("/types", pkmnController.getTypes);
  *     parameters:
  *       - name: partialName
  *         in: query
- *         description: Recherche par nom partiel
+ *         description: Recherche par nom partiel (insensible à la casse)
  *         schema:
  *           type: string
  *       - name: typeOne
  *         in: query
- *         description: Type 1 du Pokémon
+ *         description: Type principal du Pokémon
  *         schema:
  *           type: string
  *       - name: typeTwo
  *         in: query
- *         description: Type 2 du Pokémon
+ *         description: Second type du Pokémon
  *         schema:
  *           type: string
  *       - name: page
  *         in: query
- *         description: Page pour la pagination
+ *         description: Numéro de page pour la pagination
  *         schema:
  *           type: integer
+ *           default: 1
  *       - name: size
  *         in: query
  *         description: Nombre d'éléments par page
  *         schema:
  *           type: integer
+ *           default: 10
  *     responses:
  *       200:
- *         description: Liste des Pokémon trouvés
+ *         description: Liste paginée des Pokémon trouvés
  *       500:
  *         description: Erreur serveur
  */
@@ -66,7 +67,7 @@ router.get("/search", authenticate, pkmnController.searchPokemon);
  *     parameters:
  *       - name: id
  *         in: query
- *         description: ID du Pokémon
+ *         description: Identifiant unique du Pokémon
  *         schema:
  *           type: string
  *       - name: name
@@ -76,7 +77,7 @@ router.get("/search", authenticate, pkmnController.searchPokemon);
  *           type: string
  *     responses:
  *       200:
- *         description: Retourne un Pokémon
+ *         description: Détails du Pokémon avec statistiques, capacités, etc.
  *       404:
  *         description: Aucun Pokémon trouvé
  *       500:
@@ -88,7 +89,7 @@ router.get("/", authenticate, pkmnController.getPokemon);
  * @swagger
  * /api/pkmn/create:
  *   post:
- *     summary: Ajouter un nouveau Pokémon
+ *     summary: Ajouter un nouveau Pokémon à la base de données
  *     tags: [Pokemon]
  *     security:
  *       - bearerAuth: []
@@ -114,6 +115,39 @@ router.get("/", authenticate, pkmnController.getPokemon);
  *               attack:
  *                 type: integer
  *                 example: 55
+ *               defense:
+ *                 type: integer
+ *                 example: 40
+ *               specialAttack:
+ *                 type: integer
+ *                 example: 50
+ *               specialDefense:
+ *                 type: integer
+ *                 example: 50
+ *               speed:
+ *                 type: integer
+ *                 example: 90
+ *               weight:
+ *                 type: integer
+ *                 example: 60
+ *               height:
+ *                 type: integer
+ *                 example: 4
+ *               moves:
+ *                 type: array
+ *                 example: ["thunderbolt", "quick-attack"]
+ *               abilities:
+ *                 type: array
+ *                 example: ["static", "lightning-rod"]
+ *               cri:
+ *                 type: string
+ *                 example: "https://play.pokemonshowdown.com/audio/cries/pikachu.mp3"
+ *               description:
+ *                 type: string
+ *                 example: "Pikachu stocke l'électricité dans ses joues."
+ *               image:
+ *                 type: string
+ *                 example: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
  *     responses:
  *       201:
  *         description: Pokémon ajouté avec succès
@@ -162,7 +196,7 @@ router.post("/region", authenticate, authorize("ADMIN"), pkmnController.addRegio
  * @swagger
  * /api/pkmn:
  *   delete:
- *     summary: Supprimer un Pokémon
+ *     summary: Supprimer un Pokémon de la base de données
  *     tags: [Pokemon]
  *     security:
  *       - bearerAuth: []
@@ -186,7 +220,7 @@ router.delete("/", authenticate, authorize("ADMIN"), pkmnController.deletePokemo
  * @swagger
  * /api/pkmn:
  *   put:
- *     summary: Modifier un Pokémon existant
+ *     summary: Modifier un Pokémon existant dans la base de données
  *     tags: [Pokemon]
  *     security:
  *       - bearerAuth: []

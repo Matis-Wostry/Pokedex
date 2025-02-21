@@ -11,7 +11,12 @@ const getTypes = (req, res) => {
 
 const createPokemon = async (req, res) => {
     try {
-        const newPokemon = await pkmnService.createPokemon(req.body);
+        const { name, nationalDexId, types, regions, hp, attack, defense, specialAttack, specialDefense, speed, description, image, weight, height, moves, abilities, cri } = req.body;
+
+        const newPokemon = await pkmnService.createPokemon({
+            name, nationalDexId, types, regions, hp, attack, defense, specialAttack, specialDefense, speed, description, image, weight, height, moves, abilities, cri
+        });
+
         res.status(201).json({ message: "Pokémon créé avec succès !", pokemon: newPokemon });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -32,7 +37,8 @@ const getPokemon = async (req, res) => {
 
 const updatePokemon = async (req, res) => {
     try {
-        const updatedPokemon = await pkmnService.updatePokemon(req.body.id, req.body);
+        const { id, ...updates } = req.body;
+        const updatedPokemon = await pkmnService.updatePokemon(id, updates);
         res.status(200).json({ message: "Pokémon mis à jour avec succès !", pokemon: updatedPokemon });
     } catch (error) {
         res.status(400).json({ error: error.message });
