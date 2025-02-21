@@ -97,7 +97,7 @@ function fetchPokemonWithDelay(i) {
                             redirect: "follow"
                         };
                         
-                        fetch("API_URL", requestOptions)
+                        fetch(API_URL, requestOptions)
                             .then(response => response.text())
                             .then(result => console.log(`✅ ${name} ajouté avec NationalDexID: ${nationalDexId}`))
                             .catch(error => console.error(`❌ Erreur pour ${name} :`, error));

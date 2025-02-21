@@ -85,8 +85,13 @@ Envoyez une requête POST à /api/auth/login avec les mêmes identifiants.
 
 Dans votre fichier fetchPokemon.js (ou l'endroit où vous faites des requêtes API), remplacez le token existant par celui que vous avez copié.
 
-### 4. Tester les requêtes
-Vous pouvez maintenant utiliser l'API pour ajouter, modifier ou supprimer des Pokémon et des dresseurs. Chaque requête nécessitant une authentification devra inclure le token JWT dans les headers.
+### 4. Lancer le script
+``` yaml
+cd Backend
+node fetchPokemon.js
+```
+
+Attendez que toutes les données soient ajoutées, puis effectuez les tests API.
 
 # 📱 Pokenative – Frontend React Native
 
