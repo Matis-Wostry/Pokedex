@@ -100,7 +100,7 @@ Attendez que toutes les données soient ajoutées, puis effectuez les tests API.
 #### Installer les dépendances
 
 ``` yaml
-cd Frontend/Pokenative
+cd Frontend
 npm init
 ```
 
