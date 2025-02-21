@@ -101,7 +101,7 @@ Attendez que toutes les données soient ajoutées, puis effectuez les tests API.
 
 ``` yaml
 cd Frontend
-npm init
+npm install
 ```
 
 #### Lancer l’application
