@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { searchPokemon, getTypes } from '../api/pokemon';
 import { useAuth } from '../context/AuthContext';
 
@@ -108,7 +108,10 @@ export default function Pokedex() {
                         <img src="/pokeball.svg" alt="" className="header-logo" />
                         <h1>Pokédex</h1>
                     </div>
-                    <button className="btn-logout" onClick={logout}>Déconnexion</button>
+                    <div className="header-actions">
+                        <Link to="/profile" className="btn-secondary">👤 Profil</Link>
+                        <button className="btn-logout" onClick={logout}>Déconnexion</button>
+                    </div>
                 </div>
             </header>
 

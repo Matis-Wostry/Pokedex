@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Pokedex from './pages/Pokedex';
 import PokemonDetail from './pages/PokemonDetail';
+import Profile from './pages/Profile';
 
 export default function App() {
     return (
@@ -18,6 +19,9 @@ export default function App() {
                     } />
                     <Route path="/pokemon/:id" element={
                         <ProtectedRoute><PokemonDetail /></ProtectedRoute>
+                    } />
+                    <Route path="/profile" element={
+                        <ProtectedRoute><Profile /></ProtectedRoute>
                     } />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

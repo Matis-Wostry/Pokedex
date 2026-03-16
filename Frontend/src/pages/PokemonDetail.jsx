@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPokemon } from '../api/pokemon';
+import { getTrainer, markPokemon } from '../api/trainer';
 
 const TYPE_COLORS = {
     NORMAL: '#A8A878', FIRE: '#F08030', WATER: '#6890F0', GRASS: '#78C850',
@@ -47,16 +48,33 @@ function StatBar({ name, value }) {
 export default function PokemonDetail() {
     const { id } = useParams();
     const [pokemon, setPokemon] = useState(null);
+    const [trainer, setTrainer] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [marking, setMarking] = useState(false);
 
     useEffect(() => {
         setLoading(true);
-        getPokemon(id)
-            .then(setPokemon)
+        Promise.all([getPokemon(id), getTrainer()])
+            .then(([pkmn, trainerData]) => {
+                setPokemon(pkmn);
+                setTrainer(trainerData);
+            })
             .catch(err => setError(err.message))
             .finally(() => setLoading(false));
     }, [id]);
+
+    async function handleMark(isCaptured) {
+        if (!trainer || marking) return;
+        setMarking(true);
+        try {
+            const updated = await markPokemon(pokemon.id, isCaptured);
+            setTrainer(updated);
+        } catch {
+        } finally {
+            setMarking(false);
+        }
+    }
 
     if (loading) return <div className="loading centered">Chargement...</div>;
     if (error) return <div className="error centered">{error}</div>;
@@ -64,6 +82,9 @@ export default function PokemonDetail() {
 
     const mainType = pokemon.types[0]?.type.name.toUpperCase();
     const bgColor = TYPE_COLORS[mainType] || '#888';
+
+    const isSeen = trainer?.pkmnSeen?.some(p => p.toString() === pokemon.id.toString());
+    const isCaught = trainer?.pkmnCatch?.some(p => p.toString() === pokemon.id.toString());
 
     return (
         <div className="detail-page">
@@ -94,6 +115,25 @@ export default function PokemonDetail() {
                 <div className="detail-body">
                     {pokemon.description && (
                         <p className="detail-description">{pokemon.description}</p>
+                    )}
+
+                    {trainer && (
+                        <div className="mark-section">
+                            <button
+                                className={`btn-mark ${isSeen ? 'active-seen' : ''}`}
+                                onClick={() => handleMark(false)}
+                                disabled={marking || isSeen}
+                            >
+                                👁 {isSeen ? 'Vu' : 'Marquer comme vu'}
+                            </button>
+                            <button
+                                className={`btn-mark ${isCaught ? 'active-caught' : ''}`}
+                                onClick={() => handleMark(true)}
+                                disabled={marking || isCaught}
+                            >
+                                ✓ {isCaught ? 'Capturé' : 'Marquer comme capturé'}
+                            </button>
+                        </div>
                     )}
 
                     <div className="detail-specs">
