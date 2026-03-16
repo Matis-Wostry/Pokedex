@@ -39,6 +39,11 @@ const createPokemon = async (data) => {
 };
 
 
+const GENERATION_RANGES = {
+    1: [1, 151], 2: [152, 251], 3: [252, 386], 4: [387, 493],
+    5: [494, 649], 6: [650, 721], 7: [722, 809], 8: [810, 905], 9: [906, 1025]
+};
+
 const searchPokemon = async (filters, page = 1, size = 10) => {
     let filter = {};
 
@@ -46,23 +51,29 @@ const searchPokemon = async (filters, page = 1, size = 10) => {
         filter.name = { $regex: filters.partialName, $options: "i" };
     }
     if (filters.typeOne) {
-        filter.types = { $in: [filters.typeOne.toUpperCase()] };
+        filter.types = { $regex: `^${filters.typeOne}$`, $options: "i" };
     }
     if (filters.typeTwo) {
-        filter.types = { $in: [filters.typeTwo.toUpperCase()] };
+        filter.types = { $regex: `^${filters.typeTwo}$`, $options: "i" };
+    }
+    if (filters.generation && GENERATION_RANGES[filters.generation]) {
+        const [min, max] = GENERATION_RANGES[filters.generation];
+        filter.nationalDexId = { $gte: min, $lte: max };
     }
 
     const limit = parseInt(size);
     const skip = (parseInt(page) - 1) * limit;
 
-    const pokemons = await Pokemon.find(filter, "name").skip(skip).limit(limit);
+    const pokemons = await Pokemon.find(filter, "name image nationalDexId").skip(skip).limit(limit);
     const count = await Pokemon.countDocuments(filter);
 
     return {
         count,
         results: pokemons.map(pokemon => ({
             name: pokemon.name.toLowerCase(),
-            url: `/api/pkmn?id=${pokemon._id}` // Garder l'URL actuelle
+            image: pokemon.image,
+            nationalDexId: pokemon.nationalDexId,
+            url: `/api/pkmn?id=${pokemon._id}`
         }))
     };
 };
@@ -82,8 +93,10 @@ const getPokemonByIdOrName = async (id, name) => {
         id: pokemon._id,
         nationalDexId: pokemon.nationalDexId,
         name: pokemon.name.toLowerCase(),
+        image: pokemon.image,
         weight: pokemon.weight,
         height: pokemon.height,
+        description: pokemon.description,
         moves: pokemon.moves.map(move => ({ move: { name: move.toLowerCase() } })),
         abilities: pokemon.abilities.map(ability => ({ ability: { name: ability.toLowerCase() } })),
         cri: pokemon.cri,

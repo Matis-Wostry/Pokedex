@@ -76,8 +76,8 @@ const removeRegionFromPokemon = async (req, res) => {
 
 const searchPokemon = async (req, res) => {
     try {
-        const { partialName, typeOne, typeTwo, page = 1, size = 10 } = req.query;
-        const result = await pkmnService.searchPokemon({ partialName, typeOne, typeTwo }, page, size);
+        const { partialName, typeOne, typeTwo, generation, page = 1, size = 10 } = req.query;
+        const result = await pkmnService.searchPokemon({ partialName, typeOne, typeTwo, generation }, page, size);
         res.status(200).json(result);
     } catch (error) {
         res.status(500).json({ error: error.message });
