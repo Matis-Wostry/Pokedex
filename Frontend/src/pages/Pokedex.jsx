@@ -1,15 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { searchPokemon, getTypes } from '../api/pokemon';
+import { getTrainer } from '../api/trainer';
 import { useAuth } from '../context/AuthContext';
-
-const TYPE_COLORS = {
-    NORMAL: '#A8A878', FIRE: '#F08030', WATER: '#6890F0', GRASS: '#78C850',
-    ELECTRIC: '#F8D030', ICE: '#98D8D8', FIGHTING: '#C03028', POISON: '#A040A0',
-    GROUND: '#E0C068', FLYING: '#A890F0', PSYCHIC: '#F85888', BUG: '#A8B820',
-    ROCK: '#B8A038', GHOST: '#705898', DRAGON: '#7038F8', DARK: '#705848',
-    STEEL: '#B8B8D0', FAIRY: '#EE99AC',
-};
 
 const GENERATIONS = [
     { value: '1', label: 'Génération I — Kanto' },
@@ -25,10 +18,15 @@ const GENERATIONS = [
 
 const SIZE = 20;
 
+function toIdSet(arr) {
+    return new Set((arr || []).map(p => p?._id?.toString() || p?.toString()));
+}
+
 export default function Pokedex() {
     const { logout } = useAuth();
     const [pokemons, setPokemons] = useState([]);
     const [types, setTypes] = useState([]);
+    const [trainer, setTrainer] = useState(null);
     const [search, setSearch] = useState('');
     const [selectedType, setSelectedType] = useState('');
     const [selectedGen, setSelectedGen] = useState('');
@@ -40,6 +38,7 @@ export default function Pokedex() {
 
     useEffect(() => {
         getTypes().then(data => setTypes(data.data || [])).catch(() => {});
+        getTrainer().then(setTrainer).catch(() => {});
     }, []);
 
     const fetchPokemons = useCallback(async (currentPage, append) => {
@@ -57,7 +56,6 @@ export default function Pokedex() {
         }
     }, [search, selectedType, selectedGen]);
 
-    // Reset when filters change
     useEffect(() => {
         setPage(1);
         setPokemons([]);
@@ -65,13 +63,11 @@ export default function Pokedex() {
         fetchPokemons(1, false);
     }, [search, selectedType, selectedGen]);
 
-    // Load next page when page increases
     useEffect(() => {
         if (page === 1) return;
         fetchPokemons(page, true);
     }, [page]);
 
-    // Intersection observer on sentinel
     useEffect(() => {
         const sentinel = sentinelRef.current;
         if (!sentinel) return;
@@ -84,21 +80,10 @@ export default function Pokedex() {
         return () => observer.disconnect();
     }, [loading, hasMore]);
 
-    function handleSearch(e) {
-        setSearch(e.target.value);
-    }
+    function extractId(url) { return url.split('id=')[1]; }
 
-    function handleType(e) {
-        setSelectedType(e.target.value);
-    }
-
-    function handleGen(e) {
-        setSelectedGen(e.target.value);
-    }
-
-    function extractId(url) {
-        return url.split('id=')[1];
-    }
+    const seenSet = toIdSet(trainer?.pkmnSeen);
+    const caughtSet = toIdSet(trainer?.pkmnCatch);
 
     return (
         <div className="pokedex-page">
@@ -116,21 +101,27 @@ export default function Pokedex() {
             </header>
 
             <main className="pokedex-main">
+                {!trainer && (
+                    <p className="trainer-notice">
+                        <Link to="/profile">Crée ton profil dresseur</Link> pour débloquer le mode capture !
+                    </p>
+                )}
+
                 <div className="filters">
                     <input
                         type="text"
                         placeholder="Rechercher un Pokémon..."
                         value={search}
-                        onChange={handleSearch}
+                        onChange={e => setSearch(e.target.value)}
                         className="search-input"
                     />
-                    <select value={selectedType} onChange={handleType} className="type-select">
+                    <select value={selectedType} onChange={e => setSelectedType(e.target.value)} className="type-select">
                         <option value="">Tous les types</option>
                         {types.map(type => (
                             <option key={type} value={type}>{type}</option>
                         ))}
                     </select>
-                    <select value={selectedGen} onChange={handleGen} className="type-select">
+                    <select value={selectedGen} onChange={e => setSelectedGen(e.target.value)} className="type-select">
                         <option value="">Toutes les générations</option>
                         {GENERATIONS.map(gen => (
                             <option key={gen.value} value={gen.value}>{gen.label}</option>
@@ -143,13 +134,26 @@ export default function Pokedex() {
                 <div className="pokemon-grid">
                     {pokemons.map(pkmn => {
                         const id = extractId(pkmn.url);
+                        const isCaught = caughtSet.has(id);
+                        const isSeen = seenSet.has(id);
+                        const status = !trainer ? 'caught' : isCaught ? 'caught' : isSeen ? 'seen' : 'unseen';
+
                         return (
-                            <Link to={`/pokemon/${id}`} key={id} className="pokemon-card">
+                            <Link to={`/pokemon/${id}`} key={id} className={`pokemon-card card-${status}`}>
                                 {pkmn.image && (
-                                    <img src={pkmn.image} alt={pkmn.name} className="card-image" />
+                                    <img
+                                        src={pkmn.image}
+                                        alt={isSeen || isCaught ? pkmn.name : '?'}
+                                        className={`card-image ${status === 'unseen' ? 'img-silhouette' : ''}`}
+                                    />
                                 )}
-                                <span className="pokemon-number">#{String(pkmn.nationalDexId).padStart(3, '0')}</span>
-                                <span className="pokemon-name">{pkmn.name}</span>
+                                <span className="pokemon-number">
+                                    {status !== 'unseen' ? `#${String(pkmn.nationalDexId).padStart(3, '0')}` : '???'}
+                                </span>
+                                <span className="pokemon-name">
+                                    {status !== 'unseen' ? pkmn.name : '???'}
+                                </span>
+                                {isCaught && <span className="card-badge caught-badge">✓</span>}
                             </Link>
                         );
                     })}
@@ -159,7 +163,6 @@ export default function Pokedex() {
                 </div>
 
                 <div ref={sentinelRef} style={{ height: 40 }} />
-
                 {loading && <div className="loading">Chargement...</div>}
             </main>
         </div>
