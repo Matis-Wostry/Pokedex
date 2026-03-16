@@ -41,35 +41,57 @@ function StatBar({ name, value }) {
     );
 }
 
-// Mini-jeu de capture : barre oscillante
-const PERIOD = 1800; // ms aller-retour
-const CATCH_ZONE = { min: 35, max: 65 }; // zone verte centrale (%)
+// Mini-jeu de capture
+const CATCH_ZONE = { min: 35, max: 65 };
 
 function CaptureGame({ onResult }) {
-    const [pos, setPos] = useState(0);
-    const [result, setResult] = useState(null); // null | 'caught' | 'seen'
+    const [result, setResult] = useState(null);
+    const indicatorRef = useRef(null);
     const animRef = useRef(null);
-    const startRef = useRef(null);
-    const posRef = useRef(0);
+    const posRef = useRef(Math.random() * 100);
+    const velRef = useRef((Math.random() > 0.5 ? 1 : -1) * (0.07 + Math.random() * 0.07));
+    const lastTsRef = useRef(null);
+    const nextChangeRef = useRef(0);
 
     useEffect(() => {
         function animate(ts) {
-            if (!startRef.current) startRef.current = ts;
-            const elapsed = ts - startRef.current;
-            const t = (elapsed % PERIOD) / PERIOD;
-            const p = t < 0.5 ? t * 2 * 100 : (2 - t * 2) * 100;
-            posRef.current = p;
-            setPos(p);
+            const delta = lastTsRef.current ? Math.min(ts - lastTsRef.current, 50) : 16;
+            lastTsRef.current = ts;
+
+            // Déplacement
+            posRef.current += velRef.current * delta;
+
+            // Rebond sur les bords
+            if (posRef.current <= 0) {
+                posRef.current = 0;
+                velRef.current = Math.abs(velRef.current);
+            } else if (posRef.current >= 100) {
+                posRef.current = 100;
+                velRef.current = -Math.abs(velRef.current);
+            }
+
+            // Changement aléatoire de vitesse/direction
+            if (ts >= nextChangeRef.current) {
+                const speed = 0.07 + Math.random() * 0.09;
+                velRef.current = (Math.random() > 0.5 ? 1 : -1) * speed;
+                nextChangeRef.current = ts + 500 + Math.random() * 1000;
+            }
+
+            // Mise à jour DOM directe (évite les re-renders à 60fps)
+            if (indicatorRef.current) {
+                indicatorRef.current.style.left = `calc(${posRef.current}% - 10px)`;
+            }
+
             animRef.current = requestAnimationFrame(animate);
         }
+
         animRef.current = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(animRef.current);
     }, []);
 
-    function throwBall() {
+    function stop() {
         cancelAnimationFrame(animRef.current);
-        const p = posRef.current;
-        const success = p >= CATCH_ZONE.min && p <= CATCH_ZONE.max;
+        const success = posRef.current >= CATCH_ZONE.min && posRef.current <= CATCH_ZONE.max;
         setResult(success ? 'caught' : 'seen');
         setTimeout(() => onResult(success), 1200);
     }
@@ -87,12 +109,12 @@ function CaptureGame({ onResult }) {
 
     return (
         <div className="capture-game">
-            <p className="game-hint">Lancez la Pokéball quand l'indicateur est dans la zone verte !</p>
+            <p className="game-hint">Arrêtez la Pokéball dans la zone verte !</p>
             <div className="catch-bar">
                 <div className="catch-zone" style={{ left: `${CATCH_ZONE.min}%`, width: `${CATCH_ZONE.max - CATCH_ZONE.min}%` }} />
-                <div className="catch-indicator" style={{ left: `calc(${pos}% - 10px)` }} />
+                <div ref={indicatorRef} className="catch-indicator" />
             </div>
-            <button className="btn-throw" onClick={throwBall}>⚪ Lancer la Pokéball !</button>
+            <button className="btn-throw" onClick={stop}>⚪ Stop !</button>
         </div>
     );
 }

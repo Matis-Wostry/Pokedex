@@ -421,7 +421,7 @@ body {
     background: #fff;
     border-radius: 50%;
     box-shadow: 0 0 6px rgba(255,255,255,.8);
-    transition: left 16ms linear;
+    will-change: left;
 }
 
 .btn-throw {
