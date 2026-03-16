@@ -1,6 +1,5 @@
-const API_URL = "http://localhost:3000/api/pkmn";
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OThkZTNkNzVmOWQ4YjNiYzRlOWYxODUiLCJ1c2VybmFtZSI6Ik1hdGlzIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzczNjU4MjMwfQ.Smtpg3ArhkPR40wt7pHRU6S-dCCbohi4FVdntRsO_vs"; // Remplacez par votre token !
-
+const API_URL = "https://pokedex.matis-wostry.com/api/pkmn/create";
+const TOKEN = "";
 // Cache pour éviter de refetcher les mêmes talents/attaques
 const abilityCache = {};
 const moveCache = {};
