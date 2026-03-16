@@ -76,7 +76,7 @@ const getPokemonByIdOrName = async (id, name) => {
         pokemon = await Pokemon.findOne({ name: new RegExp(`^${name}$`, "i") });
     }
 
-    if (!pokemon) throw new Error("Pokémon non trouvé.");
+    if (!pokemon) return null;
 
     return {
         id: pokemon._id,
