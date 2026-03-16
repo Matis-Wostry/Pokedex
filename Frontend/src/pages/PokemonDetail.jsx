@@ -41,11 +41,15 @@ function StatBar({ name, value }) {
     );
 }
 
-// Mini-jeu de capture
-const CATCH_ZONE = { min: 35, max: 65 };
+function randomZone() {
+    const size = 10 + Math.random() * 25; // largeur entre 10% et 35%
+    const min = 5 + Math.random() * (90 - size); // position aléatoire dans la barre
+    return { min, max: min + size };
+}
 
 function CaptureGame({ onResult }) {
     const [result, setResult] = useState(null);
+    const catchZone = useRef(randomZone());
     const indicatorRef = useRef(null);
     const animRef = useRef(null);
     const posRef = useRef(Math.random() * 100);
@@ -91,7 +95,8 @@ function CaptureGame({ onResult }) {
 
     function stop() {
         cancelAnimationFrame(animRef.current);
-        const success = posRef.current >= CATCH_ZONE.min && posRef.current <= CATCH_ZONE.max;
+        const { min, max } = catchZone.current;
+        const success = posRef.current >= min && posRef.current <= max;
         setResult(success ? 'caught' : 'seen');
         setTimeout(() => onResult(success), 1200);
     }
@@ -111,7 +116,7 @@ function CaptureGame({ onResult }) {
         <div className="capture-game">
             <p className="game-hint">Arrêtez la Pokéball dans la zone verte !</p>
             <div className="catch-bar">
-                <div className="catch-zone" style={{ left: `${CATCH_ZONE.min}%`, width: `${CATCH_ZONE.max - CATCH_ZONE.min}%` }} />
+                <div className="catch-zone" style={{ left: `${catchZone.current.min}%`, width: `${catchZone.current.max - catchZone.current.min}%` }} />
                 <div ref={indicatorRef} className="catch-indicator" />
             </div>
             <button className="btn-throw" onClick={stop}>⚪ Stop !</button>
