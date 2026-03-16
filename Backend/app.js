@@ -10,7 +10,7 @@ const cors = require("cors");
 const app = express();
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:8081", "exp://192.168.1.29:8081"],
+    origin: ["http://localhost:5173", "http://localhost:8081", "exp://192.168.1.29:8081", "https://pokedex.matis-wostry.com"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -24,7 +24,10 @@ const swaggerOptions = {
             version: "1.0.0",
             description: "API Express pour gérer les dresseurs et les Pokémon",
         },
-        servers: [{ url: "http://localhost:3000" }],
+        servers: [
+            { url: "https://pokedex.matis-wostry.com", description: "Production" },
+            { url: "http://localhost:3000", description: "Local" }
+        ],
         components: {
             securitySchemes: {
                 bearerAuth: {
