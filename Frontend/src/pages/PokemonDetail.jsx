@@ -92,6 +92,10 @@ export default function PokemonDetail() {
                 </div>
 
                 <div className="detail-body">
+                    {pokemon.description && (
+                        <p className="detail-description">{pokemon.description}</p>
+                    )}
+
                     <div className="detail-specs">
                         <div className="spec">
                             <span className="spec-label">Taille</span>
