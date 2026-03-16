@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { searchPokemon, getTypes } from '../api/pokemon';
 import { useAuth } from '../context/AuthContext';
@@ -23,6 +23,8 @@ const GENERATIONS = [
     { value: '9', label: 'Génération IX — Paldea' },
 ];
 
+const SIZE = 20;
+
 export default function Pokedex() {
     const { logout } = useAuth();
     const [pokemons, setPokemons] = useState([]);
@@ -33,45 +35,66 @@ export default function Pokedex() {
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
-    const SIZE = 20;
+    const [hasMore, setHasMore] = useState(true);
+    const sentinelRef = useRef(null);
 
     useEffect(() => {
         getTypes().then(data => setTypes(data.data || [])).catch(() => {});
     }, []);
 
-    const fetchPokemons = useCallback(async () => {
+    const fetchPokemons = useCallback(async (currentPage, append) => {
         setLoading(true);
         try {
-            const data = await searchPokemon({ partialName: search, typeOne: selectedType, generation: selectedGen, page, size: SIZE });
-            setPokemons(data.results || []);
+            const data = await searchPokemon({ partialName: search, typeOne: selectedType, generation: selectedGen, page: currentPage, size: SIZE });
+            const results = data.results || [];
+            setPokemons(prev => append ? [...prev, ...results] : results);
             setTotal(data.count || 0);
+            setHasMore(results.length === SIZE);
         } catch {
-            setPokemons([]);
+            if (!append) setPokemons([]);
         } finally {
             setLoading(false);
         }
-    }, [search, selectedType, selectedGen, page]);
+    }, [search, selectedType, selectedGen]);
 
+    // Reset when filters change
     useEffect(() => {
-        fetchPokemons();
-    }, [fetchPokemons]);
+        setPage(1);
+        setPokemons([]);
+        setHasMore(true);
+        fetchPokemons(1, false);
+    }, [search, selectedType, selectedGen]);
+
+    // Load next page when page increases
+    useEffect(() => {
+        if (page === 1) return;
+        fetchPokemons(page, true);
+    }, [page]);
+
+    // Intersection observer on sentinel
+    useEffect(() => {
+        const sentinel = sentinelRef.current;
+        if (!sentinel) return;
+        const observer = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && !loading && hasMore) {
+                setPage(p => p + 1);
+            }
+        }, { threshold: 0.1 });
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [loading, hasMore]);
 
     function handleSearch(e) {
         setSearch(e.target.value);
-        setPage(1);
     }
 
     function handleType(e) {
         setSelectedType(e.target.value);
-        setPage(1);
     }
 
     function handleGen(e) {
         setSelectedGen(e.target.value);
-        setPage(1);
     }
-
-    const totalPages = Math.ceil(total / SIZE);
 
     function extractId(url) {
         return url.split('id=')[1];
@@ -114,39 +137,27 @@ export default function Pokedex() {
 
                 <p className="results-count">{total} Pokémon trouvé{total !== 1 ? 's' : ''}</p>
 
-                {loading ? (
-                    <div className="loading">Chargement...</div>
-                ) : (
-                    <div className="pokemon-grid">
-                        {pokemons.map(pkmn => {
-                            const id = extractId(pkmn.url);
-                            return (
-                                <Link to={`/pokemon/${id}`} key={id} className="pokemon-card">
-                                    {pkmn.image && (
-                                        <img src={pkmn.image} alt={pkmn.name} className="card-image" />
-                                    )}
-                                    <span className="pokemon-number">#{String(pkmn.nationalDexId).padStart(3, '0')}</span>
-                                    <span className="pokemon-name">{pkmn.name}</span>
-                                </Link>
-                            );
-                        })}
-                        {pokemons.length === 0 && (
-                            <p className="no-results">Aucun Pokémon trouvé.</p>
-                        )}
-                    </div>
-                )}
+                <div className="pokemon-grid">
+                    {pokemons.map(pkmn => {
+                        const id = extractId(pkmn.url);
+                        return (
+                            <Link to={`/pokemon/${id}`} key={id} className="pokemon-card">
+                                {pkmn.image && (
+                                    <img src={pkmn.image} alt={pkmn.name} className="card-image" />
+                                )}
+                                <span className="pokemon-number">#{String(pkmn.nationalDexId).padStart(3, '0')}</span>
+                                <span className="pokemon-name">{pkmn.name}</span>
+                            </Link>
+                        );
+                    })}
+                    {!loading && pokemons.length === 0 && (
+                        <p className="no-results">Aucun Pokémon trouvé.</p>
+                    )}
+                </div>
 
-                {totalPages > 1 && (
-                    <div className="pagination">
-                        <button onClick={() => setPage(p => p - 1)} disabled={page === 1}>
-                            ← Précédent
-                        </button>
-                        <span>Page {page} / {totalPages}</span>
-                        <button onClick={() => setPage(p => p + 1)} disabled={page === totalPages}>
-                            Suivant →
-                        </button>
-                    </div>
-                )}
+                <div ref={sentinelRef} style={{ height: 40 }} />
+
+                {loading && <div className="loading">Chargement...</div>}
             </main>
         </div>
     );

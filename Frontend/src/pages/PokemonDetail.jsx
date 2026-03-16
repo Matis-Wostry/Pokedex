@@ -10,6 +10,18 @@ const TYPE_COLORS = {
     STEEL: '#B8B8D0', FAIRY: '#EE99AC',
 };
 
+const TYPE_FR = {
+    normal: 'Normal', fire: 'Feu', water: 'Eau', grass: 'Plante',
+    electric: 'Électrik', ice: 'Glace', fighting: 'Combat', poison: 'Poison',
+    ground: 'Sol', flying: 'Vol', psychic: 'Psy', bug: 'Insecte',
+    rock: 'Roche', ghost: 'Spectre', dragon: 'Dragon', dark: 'Ténèbres',
+    steel: 'Acier', fairy: 'Fée',
+};
+
+function formatName(name) {
+    return name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 const STAT_LABELS = {
     hp: 'PV', attack: 'Attaque', defense: 'Défense',
     'special-attack': 'Att. Spé.', 'special-defense': 'Déf. Spé.', speed: 'Vitesse',
@@ -69,7 +81,7 @@ export default function PokemonDetail() {
                                     className="type-badge"
                                     style={{ backgroundColor: TYPE_COLORS[t.type.name.toUpperCase()] || '#888' }}
                                 >
-                                    {t.type.name.toUpperCase()}
+                                    {TYPE_FR[t.type.name] || t.type.name}
                                 </span>
                             ))}
                         </div>
@@ -102,7 +114,7 @@ export default function PokemonDetail() {
                         <h2>Talents</h2>
                         <div className="tag-list">
                             {pokemon.abilities.map(a => (
-                                <span key={a.ability.name} className="tag">{a.ability.name}</span>
+                                <span key={a.ability.name} className="tag">{formatName(a.ability.name)}</span>
                             ))}
                         </div>
                     </section>
@@ -111,7 +123,7 @@ export default function PokemonDetail() {
                         <h2>Attaques ({pokemon.moves.length})</h2>
                         <div className="tag-list">
                             {pokemon.moves.slice(0, 20).map(m => (
-                                <span key={m.move.name} className="tag">{m.move.name}</span>
+                                <span key={m.move.name} className="tag">{formatName(m.move.name)}</span>
                             ))}
                             {pokemon.moves.length > 20 && (
                                 <span className="tag tag-more">+{pokemon.moves.length - 20} autres</span>

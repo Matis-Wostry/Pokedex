@@ -1,0 +1,31 @@
+services:
+  pokedex-backend:
+    build: ./Backend
+    container_name: pokedex-backend
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      MONGO_URI: ${MONGO_URI}
+      SECRET_KEY: ${SECRET_KEY}
+    depends_on:
+      - pokedex-db
+    networks:
+      - proxy
+      - pokedex_internal
+
+  pokedex-db:
+    image: mongo:7
+    container_name: pokedex-db
+    restart: unless-stopped
+    volumes:
+      - pokedex_db_data:/data/db
+    networks:
+      - pokedex_internal
+
+networks:
+  proxy:
+    external: true
+  pokedex_internal:
+
+volumes:
+  pokedex_db_data:
