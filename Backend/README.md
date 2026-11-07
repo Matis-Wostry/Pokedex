@@ -1,144 +1,136 @@
-# Pokédex API
+# Backend — API Pokédex
 
-API REST backend pour une application Pokédex complète. Permet de gérer les Pokémon, les comptes utilisateurs et les profils de Dresseurs (Pokémon vus et capturés).
+API REST complète pour l'application Pokédex, développée dans le cadre d'un projet scolaire.
 
-## Stack technique
+---
 
-- **Runtime** : Node.js
-- **Framework** : Express 4
-- **Base de données** : MongoDB + Mongoose
-- **Authentification** : JWT (JSON Web Tokens) + bcrypt
-- **Documentation** : Swagger UI (`/api-docs`)
-- **Tests** : Jest + Supertest + mongodb-memory-server
+## Stack
 
-## Prérequis
+| Technologie | Rôle |
+|-------------|------|
+| Node.js + Express | Serveur HTTP |
+| MongoDB + Mongoose | Base de données |
+| JWT + bcrypt | Authentification |
+| Swagger / OpenAPI | Documentation interactive |
+| Jest + Supertest | Tests unitaires |
+| express-rate-limit | Protection contre les abus |
+| Docker | Conteneurisation |
+
+---
+
+## Fonctionnalités
+
+- Authentification complète (inscription, connexion, JWT)
+- Gestion des rôles (USER / ADMIN)
+- CRUD Pokémon (modification réservée aux ADMIN)
+- Recherche par nom (partielle), filtre par type, filtre par génération (I à IX)
+- Profil dresseur : création, mise à jour, suivi des Pokémon vus et capturés
+- Rate limiting : 100 req/15 min par IP (global), 10 req/15 min sur les routes d'auth
+- Documentation Swagger interactive
+
+---
+
+## Structure
+
+```
+Backend/
+├── app.js                  # Config Express (sans listen)
+├── server.js               # Point d'entrée — connexion MongoDB + listen
+├── fetchPokemon.js         # Script d'import depuis PokéAPI
+├── updateFrenchNames.js    # Script de mise à jour des noms français
+├── Dockerfile
+└── src/
+    ├── controllers/        # Handlers HTTP
+    │   ├── authController.js
+    │   ├── pkmnController.js
+    │   └── trainerController.js
+    ├── middlewares/        # Auth JWT + contrôle des rôles
+    │   ├── authMiddleware.js
+    │   └── permissionMiddleware.js
+    ├── models/             # Schémas Mongoose
+    │   ├── Pokemon.js
+    │   ├── User.js
+    │   ├── Trainers.js
+    │   └── PkmnType.js
+    ├── routes/             # Définition des routes + docs Swagger
+    │   ├── authRoutes.js
+    │   ├── pkmnRoutes.js
+    │   └── trainerRoutes.js
+    ├── services/           # Logique métier
+    │   ├── pkmnService.js
+    │   └── trainerService.js
+    └── tests/              # Suite de tests Jest
+        ├── setup.js
+        ├── auth.test.js
+        ├── pkmn.test.js
+        └── trainer.test.js
+```
+
+---
+
+## Lancement local
+
+### Prérequis
 
 - Node.js 18+
-- MongoDB local ou une URI MongoDB Atlas
+- MongoDB (local ou Atlas)
 
-## Installation
+### Installation
 
 ```bash
+cd Backend
 npm install
 ```
 
-Créer un fichier `.env` à la racine du dossier `Backend/` :
+Créer le fichier `.env` :
 
 ```env
 PORT=3000
+SECRET_KEY=ta_clé_secrète
 MONGO_URI=mongodb://localhost:27017/pokedex
-SECRET_KEY=votre_clé_secrète_jwt
 ```
 
-## Lancer le serveur
-
 ```bash
-# Développement (hot-reload)
 npm run dev
-
-# Production
-node server.js
 ```
 
-## Lancer les tests
-
-```bash
-npm test
-```
-
-Les tests utilisent une base MongoDB en mémoire — aucune configuration supplémentaire n'est nécessaire.
-
-## Documentation API
-
-Une fois le serveur démarré, la documentation Swagger est disponible sur :
-
-```
-http://localhost:3000/api-docs
-```
+- API : `http://localhost:3000`
+- Swagger : `http://localhost:3000/api-docs`
 
 ---
 
-## Endpoints
+## Routes
 
 ### Auth — `/api/auth`
 
-| Méthode | Route | Description | Auth requise |
-|---------|-------|-------------|:---:|
-| POST | `/register` | Créer un compte utilisateur | Non |
-| POST | `/login` | Se connecter et obtenir un token JWT | Non |
+| Méthode | Route | Description | Auth |
+|---------|-------|-------------|------|
+| POST | `/register` | Inscription | Non |
+| POST | `/login` | Connexion → retourne un JWT | Non |
 | GET | `/checkUser` | Vérifier l'utilisateur connecté | Oui |
-
-**Exemple — inscription :**
-```json
-POST /api/auth/register
-{
-  "username": "ash",
-  "password": "pikachu123"
-}
-```
-
-**Exemple — connexion :**
-```json
-POST /api/auth/login
-{
-  "username": "ash",
-  "password": "pikachu123"
-}
-// Réponse : { "token": "eyJhbGci..." }
-```
-
----
 
 ### Pokémon — `/api/pkmn`
 
-Les routes en lecture nécessitent un token. Les routes de modification nécessitent le rôle **ADMIN**.
-
 | Méthode | Route | Description | Auth | Rôle |
-|---------|-------|-------------|:----:|:----:|
-| GET | `/types` | Liste des 18 types | Non | — |
+|---------|-------|-------------|------|------|
+| GET | `/types` | Liste des types disponibles | Non | — |
 | GET | `/search` | Recherche avec filtres et pagination | Oui | USER |
-| GET | `/` | Détail d'un Pokémon par ID ou nom | Oui | USER |
+| GET | `/:id` | Détail d'un Pokémon | Oui | USER |
 | POST | `/create` | Créer un Pokémon | Oui | ADMIN |
 | PUT | `/` | Modifier un Pokémon | Oui | ADMIN |
 | DELETE | `/` | Supprimer un Pokémon | Oui | ADMIN |
-| POST | `/region` | Ajouter une région à un Pokémon | Oui | ADMIN |
-| DELETE | `/region` | Supprimer une région d'un Pokémon | Oui | ADMIN |
 
-**Paramètres de recherche (`/search`) :**
+**Paramètres de recherche (`GET /search`) :**
 
 | Paramètre | Type | Description |
 |-----------|------|-------------|
 | `partialName` | string | Recherche par nom partiel (insensible à la casse) |
-| `typeOne` | string | Filtrer par type (ex: `FIRE`) |
-| `typeTwo` | string | Filtrer par second type |
+| `typeOne` | string | Filtre par type (ex: `fire`) |
+| `generation` | integer | Filtre par génération (`1` à `9`) |
 | `page` | integer | Numéro de page (défaut: 1) |
-| `size` | integer | Résultats par page (défaut: 10) |
-
-**Exemple — créer un Pokémon :**
-```json
-POST /api/pkmn/create
-Authorization: Bearer <token>
-{
-  "name": "Pikachu",
-  "nationalDexId": 25,
-  "types": ["ELECTRIC"],
-  "regions": [{ "regionName": "Kanto", "regionPokedexNumber": 25 }],
-  "hp": 35, "attack": 55, "defense": 40,
-  "specialAttack": 50, "specialDefense": 50, "speed": 90,
-  "description": "Pikachu stocke l'électricité dans ses joues.",
-  "image": "https://example.com/pikachu.png",
-  "weight": 60, "height": 4,
-  "moves": ["tonnerre", "vive-attaque"],
-  "abilities": ["statik"],
-  "cri": "https://example.com/pikachu.mp3"
-}
-```
-
----
+| `size` | integer | Résultats par page (défaut: 20) |
 
 ### Dresseur — `/api/trainer`
-
-Toutes les routes nécessitent un token. Chaque utilisateur ne peut avoir qu'un seul dresseur.
 
 | Méthode | Route | Description |
 |---------|-------|-------------|
@@ -147,17 +139,6 @@ Toutes les routes nécessitent un token. Chaque utilisateur ne peut avoir qu'un 
 | PUT | `/` | Modifier son profil dresseur |
 | DELETE | `/` | Supprimer son profil dresseur |
 | POST | `/mark` | Marquer un Pokémon comme vu ou capturé |
-
-**Exemple — marquer un Pokémon capturé :**
-```json
-POST /api/trainer/mark
-Authorization: Bearer <token>
-{
-  "pkmnID": "65e0c265f52ffe0b2a171b5a",
-  "isCaptured": true
-}
-```
-> Un Pokémon capturé est automatiquement aussi marqué comme vu.
 
 ---
 
@@ -173,79 +154,64 @@ Authorization: Bearer <token>
 ### Pokemon
 | Champ | Type | Description |
 |-------|------|-------------|
-| `name` | String | Unique, requis |
+| `name` | String | Nom en français |
 | `nationalDexId` | Number | Numéro du Pokédex national |
-| `types` | [String] | Ex: `["FIRE", "FLYING"]` |
-| `regions` | [Object] | `{ regionName, regionPokedexNumber }` |
-| `hp`, `attack`, `defense`, `specialAttack`, `specialDefense`, `speed` | Number | Statistiques de base |
+| `types` | [String] | Ex: `["fire", "flying"]` |
 | `description` | String | Description en français |
-| `image` | String | URL de l'image officielle |
-| `weight`, `height` | Number | Poids (hg) et taille (dm) |
+| `image` | String | URL du sprite officiel |
+| `height`, `weight` | Number | Taille (dm) et poids (hg) |
 | `moves` | [String] | Liste des attaques |
 | `abilities` | [String] | Liste des talents |
 | `cri` | String | URL du fichier audio |
+| `stats` | [Object] | `{ stat: { name }, base_stat }` |
 
 ### Trainer
 | Champ | Type | Description |
 |-------|------|-------------|
 | `username` | String | Lié au compte User |
 | `trainerName` | String | Nom du dresseur |
-| `imgUrl` | String | URL de l'image du dresseur |
+| `imgUrl` | String | URL de l'avatar |
 | `pkmnSeen` | [ObjectId] | Pokémon vus |
 | `pkmnCatch` | [ObjectId] | Pokémon capturés |
 | `creationDate` | Date | Date de création |
 
 ---
 
-## Seeder — Importer les 1025 Pokémon
+## Import des Pokémon
 
-Un script permet d'importer tous les Pokémon depuis l'API officielle [PokéAPI](https://pokeapi.co) avec les noms et descriptions en français.
+Le script `fetchPokemon.js` importe les 1025 Pokémon depuis [PokéAPI](https://pokeapi.co) avec les noms et descriptions en français.
 
-> ⚠️ Un compte ADMIN doit exister avant de lancer le script.
+### Étapes
+
+1. Créer un compte via Swagger (`POST /api/auth/register`)
+2. Se connecter (`POST /api/auth/login`) → copier le JWT
+3. Passer le compte en ADMIN dans MongoDB :
+   ```js
+   db.users.updateOne({ username: "ton_username" }, { $set: { role: "ADMIN" } })
+   ```
+4. Renseigner le token dans `fetchPokemon.js` :
+   ```js
+   const TOKEN = 'ton_jwt_ici';
+   ```
+5. Lancer le script :
+   ```bash
+   node fetchPokemon.js
+   ```
+   > Durée estimée : ~20 min pour 1025 Pokémon (appels PokéAPI séquentiels pour les traductions françaises)
+
+### Mettre à jour les noms français (si déjà importé en anglais)
 
 ```bash
-node fetchPokemon.js
+node updateFrenchNames.js
 ```
-
-Le script :
-- Récupère les 1025 Pokémon de la PokéAPI
-- Traduit les noms et descriptions en français
-- Associe chaque Pokémon à ses régions (Kanto, Johto, Hoenn, etc.)
-- Insère les données via l'API (requiert un token ADMIN dans le script)
 
 ---
 
-## Structure du projet
+## Tests
 
+```bash
+npm test
 ```
-Backend/
-├── app.js                  # Config Express (sans listen)
-├── server.js               # Point d'entrée — connexion MongoDB + listen
-├── fetchPokemon.js         # Script de seed PokéAPI
-├── package.json
-└── src/
-    ├── controllers/        # Handlers HTTP
-    │   ├── authController.js
-    │   ├── pkmnController.js
-    │   └── trainerController.js
-    ├── middlewares/        # Auth JWT + contrôle des rôles
-    │   ├── authMiddleware.js
-    │   └── permissionMiddleware.js
-    ├── models/             # Schémas Mongoose
-    │   ├── Pokemon.js
-    │   ├── User.js
-    │   ├── Trainers.js
-    │   └── PkmnType.js
-    ├── routes/             # Définition des routes + docs Swagger
-    │   ├── pkmnRoutes.js
-    │   ├── authRoutes.js
-    │   └── trainerRoutes.js
-    ├── services/           # Logique métier
-    │   ├── pkmnService.js
-    │   └── trainerService.js
-    └── tests/              # Suite de tests Jest
-        ├── setup.js
-        ├── auth.test.js
-        ├── pkmn.test.js
-        └── trainer.test.js
-```
+
+Tests Jest + Supertest sur une base MongoDB en mémoire — aucune configuration supplémentaire requise.
+
