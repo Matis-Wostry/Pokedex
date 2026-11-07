@@ -51,6 +51,9 @@ export default function Pokedex() {
             setHasMore(results.length === SIZE);
         } catch {
             if (!append) setPokemons([]);
+            // Sans ça, une erreur (ex. 429) laissait hasMore à true : le
+            // scroll infini redemandait la page suivante en boucle.
+            setHasMore(false);
         } finally {
             setLoading(false);
         }

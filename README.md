@@ -31,7 +31,7 @@ Application Pokédex fullstack avec système de capture gamifié, profil dresseu
   - Vu → sprite + description visible
   - Capturé → toutes les infos débloquées (stats, talents, attaques, cri)
 - Profil dresseur : nom, avatar, barres de progression vu/capturé
-- Rate limiting (100 req/15 min par IP, 10 sur l'auth)
+- Rate limiting (1000 req/15 min par visiteur, 10 sur l'auth)
 - Documentation Swagger interactive
 
 ---

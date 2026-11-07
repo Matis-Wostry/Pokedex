@@ -57,10 +57,12 @@ app.set("trust proxy", 1);
 const clientKey = (req) =>
     rateLimit.ipKeyGenerator(req.headers["cf-connecting-ip"] || req.ip);
 
-// Rate limiting : 100 requêtes / 15 min par IP
+// Rate limiting : 1000 requêtes / 15 min par visiteur. 100 était trop bas :
+// parcourir tout le Pokédex en scroll infini fait déjà ~55 requêtes, plus les
+// fiches, les types et le profil.
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 1000,
     keyGenerator: clientKey,
     message: { error: "Trop de requêtes, réessayez dans 15 minutes." },
     standardHeaders: true,

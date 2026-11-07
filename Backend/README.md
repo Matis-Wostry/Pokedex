@@ -25,7 +25,7 @@ API REST complète pour l'application Pokédex, développée dans le cadre d'un 
 - CRUD Pokémon (modification réservée aux ADMIN)
 - Recherche par nom (partielle), filtre par type, filtre par génération (I à IX)
 - Profil dresseur : création, mise à jour, suivi des Pokémon vus et capturés
-- Rate limiting : 100 req/15 min par IP (global), 10 req/15 min sur les routes d'auth
+- Rate limiting : 1000 req/15 min par visiteur (global), 10 req/15 min sur les routes d'auth
 - Documentation Swagger interactive
 
 ---
