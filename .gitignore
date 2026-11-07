@@ -1,0 +1,4 @@
+# Secrets (MONGO_URI, SECRET_KEY) : jamais dans le dépôt
+.env
+# Frontend construit par le service pokedex-frontend-build
+/dist
