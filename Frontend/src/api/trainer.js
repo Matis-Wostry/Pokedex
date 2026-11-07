@@ -1,3 +1,4 @@
+import { authFetch } from './session';
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function authHeaders() {
@@ -9,7 +10,7 @@ function authHeaders() {
 }
 
 export async function getTrainer() {
-    const res = await fetch(`${API}/api/trainer`, { headers: authHeaders() });
+    const res = await authFetch(`${API}/api/trainer`, { headers: authHeaders() });
     if (res.status === 404) return null;
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erreur');
@@ -17,7 +18,7 @@ export async function getTrainer() {
 }
 
 export async function createTrainer(trainerName) {
-    const res = await fetch(`${API}/api/trainer`, {
+    const res = await authFetch(`${API}/api/trainer`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({ trainerName }),
@@ -28,7 +29,7 @@ export async function createTrainer(trainerName) {
 }
 
 export async function updateTrainer(updates) {
-    const res = await fetch(`${API}/api/trainer`, {
+    const res = await authFetch(`${API}/api/trainer`, {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify(updates),
@@ -39,7 +40,7 @@ export async function updateTrainer(updates) {
 }
 
 export async function markPokemon(pkmnID, isCaptured) {
-    const res = await fetch(`${API}/api/trainer/mark`, {
+    const res = await authFetch(`${API}/api/trainer/mark`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({ pkmnID, isCaptured }),

@@ -31,7 +31,7 @@ services:
     working_dir: /app
     command: >
       sh -c "npm ci --no-audit --no-fund
-      && npm run build -- --outDir /tmp/dist
+      && npm run build -- --outDir /tmp/dist --emptyOutDir
       && rm -rf /out/* && cp -r /tmp/dist/. /out/"
     volumes:
       - ./Frontend:/app
