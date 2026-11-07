@@ -46,10 +46,22 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
+// En production, les requêtes arrivent par Cloudflare puis Caddy. L'API ne
+// voit donc jamais l'IP du visiteur directement, seulement celle du proxy.
+// Sans ce réglage, tous les visiteurs partageraient la même limite : 10
+// connexions ratées, et plus personne ne pourrait se connecter.
+app.set("trust proxy", 1);
+
+// La vraie IP du visiteur est dans CF-Connecting-IP (ajouté par Cloudflare) ;
+// en local, sans Cloudflare, on retombe sur req.ip.
+const clientKey = (req) =>
+    rateLimit.ipKeyGenerator(req.headers["cf-connecting-ip"] || req.ip);
+
 // Rate limiting : 100 requêtes / 15 min par IP
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
+    keyGenerator: clientKey,
     message: { error: "Trop de requêtes, réessayez dans 15 minutes." },
     standardHeaders: true,
     legacyHeaders: false,
@@ -59,6 +71,7 @@ const limiter = rateLimit({
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,
+    keyGenerator: clientKey,
     message: { error: "Trop de tentatives de connexion, réessayez dans 15 minutes." },
     standardHeaders: true,
     legacyHeaders: false,
