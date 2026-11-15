@@ -43,6 +43,12 @@ services:
     image: mongo:7
     container_name: pokedex-db
     restart: unless-stopped
+    environment:
+      # Avec ces deux variables, l'image lance mongod avec --auth : plus aucun
+      # accès sans identifiants, même depuis le réseau Docker. La sauvegarde du
+      # serveur (dump-bases.sh) s'en sert aussi pour s'authentifier.
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?MONGO_ROOT_USER manquant dans .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD manquant dans .env}
     volumes:
       - pokedex_db_data:/data/db
     networks:
