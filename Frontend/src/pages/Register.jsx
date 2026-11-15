@@ -82,7 +82,7 @@ export default function Register() {
                         Site de démonstration : un compte resté un mois sans connexion
                         est supprimé automatiquement, avec son profil de dresseur.{' '}
                         <a
-                            href="https://matis-wostry.com/politique-de-confidentialite.html"
+                            href="https://matis-wostry.com/politique-de-confidentialite.html?from=pokedex#pokedex"
                             target="_blank"
                             rel="noopener"
                         >
