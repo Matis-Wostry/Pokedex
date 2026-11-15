@@ -1,9 +1,17 @@
 /**
  * Met à jour les noms français des talents et attaques pour tous les Pokémon déjà en base.
- * Usage : node updateFrenchNames.js
+ * Le jeton d'un compte ADMIN se passe par la variable POKEDEX_TOKEN, jamais
+ * dans ce fichier (le dépôt est public) :
+ *   bash        : POKEDEX_TOKEN=xxx node updateFrenchNames.js
+ *   PowerShell  : $env:POKEDEX_TOKEN="xxx"; node updateFrenchNames.js
+ * Un jeton est valable 7 jours : se reconnecter pour en obtenir un nouveau.
  */
 const API_URL = "http://localhost:3000/api/pkmn";
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OThkZTNkNzVmOWQ4YjNiYzRlOWYxODUiLCJ1c2VybmFtZSI6Ik1hdGlzIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzczNjU4MjMwfQ.Smtpg3ArhkPR40wt7pHRU6S-dCCbohi4FVdntRsO_vs"; // Remplacez par votre token !
+const TOKEN = process.env.POKEDEX_TOKEN;
+if (!TOKEN) {
+    console.error("Jeton manquant : lancer avec la variable POKEDEX_TOKEN (voir l'en-tête du fichier).");
+    process.exit(1);
+}
 
 const abilityCache = {};
 const moveCache = {};

@@ -59,7 +59,7 @@ router.post("/register", authController.register);
  *                 example: "pikachu123"
  *     responses:
  *       200:
- *         description: Connexion réussie, retourne un token JWT
+ *         description: Connexion réussie, retourne un token JWT valable 7 jours
  *       400:
  *         description: Identifiants invalides
  *       500:

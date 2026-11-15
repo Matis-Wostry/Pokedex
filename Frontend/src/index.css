@@ -82,6 +82,16 @@ body {
 .auth-link a { color: var(--red); text-decoration: none; font-weight: 600; }
 .auth-link a:hover { text-decoration: underline; }
 
+.auth-notice {
+    margin: .75rem 0 .25rem;
+    font-size: .8rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+    text-align: left;
+}
+.auth-notice.centered { margin-top: 1rem; text-align: center; }
+.auth-notice a { color: var(--text); }
+
 /* ── POKÉDEX ────────────────────────────────────── */
 .pokedex-header {
     background: var(--red);

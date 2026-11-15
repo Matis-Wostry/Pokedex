@@ -1,5 +1,17 @@
+/**
+ * Importe les 1025 Pokémon depuis PokéAPI.
+ * Le jeton d'un compte ADMIN se passe par la variable POKEDEX_TOKEN, jamais
+ * dans ce fichier (le dépôt est public) :
+ *   bash        : POKEDEX_TOKEN=xxx node fetchPokemon.js
+ *   PowerShell  : $env:POKEDEX_TOKEN="xxx"; node fetchPokemon.js
+ * Un jeton est valable 7 jours : se reconnecter pour en obtenir un nouveau.
+ */
 const API_URL = "https://pokedex.matis-wostry.com/api/pkmn/create";
-const TOKEN = "";
+const TOKEN = process.env.POKEDEX_TOKEN;
+if (!TOKEN) {
+    console.error("Jeton manquant : lancer avec la variable POKEDEX_TOKEN (voir l'en-tête du fichier).");
+    process.exit(1);
+}
 // Cache pour éviter de refetcher les mêmes talents/attaques
 const abilityCache = {};
 const moveCache = {};

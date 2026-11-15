@@ -76,6 +76,19 @@ export default function Register() {
                         />
                     </div>
                     {error && <p className="error">{error}</p>}
+                    {/* Même règle que dans le backend (accountPurgeService.js)
+                        et dans la politique de confidentialité du site. */}
+                    <p className="auth-notice">
+                        Site de démonstration : un compte resté un mois sans connexion
+                        est supprimé automatiquement, avec son profil de dresseur.{' '}
+                        <a
+                            href="https://matis-wostry.com/politique-de-confidentialite.html"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            Politique de confidentialité
+                        </a>
+                    </p>
                     <button type="submit" className="btn-primary" disabled={loading}>
                         {loading ? 'Création...' : 'Créer mon compte'}
                     </button>

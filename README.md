@@ -22,7 +22,8 @@ Application Pokédex fullstack avec système de capture gamifié, profil dresseu
 
 ## Fonctionnalités
 
-- Authentification complète (inscription / connexion / JWT)
+- Authentification complète (inscription / connexion / JWT valable 7 jours)
+- Comptes de démonstration : suppression automatique après un mois sans connexion, annoncée à l'inscription
 - 1025 Pokémon importés depuis [PokéAPI](https://pokeapi.co) avec noms et descriptions en français
 - Recherche par nom, filtrage par type et par génération (I à IX)
 - Scroll infini
@@ -72,8 +73,7 @@ npm run dev
 1. Créer un compte via Swagger (`POST /api/auth/register`)
 2. Se connecter (`POST /api/auth/login`) → copier le token
 3. Passer le compte en ADMIN dans MongoDB : `db.users.updateOne({username: "..."}, {$set: {role: "ADMIN"}})`
-4. Renseigner le token dans `Backend/fetchPokemon.js`
-5. Lancer : `node fetchPokemon.js` (~20 min pour 1025 Pokémon en français)
+4. Lancer depuis `Backend/`, le token dans la variable `POKEDEX_TOKEN` : `POKEDEX_TOKEN=ton_jwt node fetchPokemon.js` (~20 min pour 1025 Pokémon en français)
 
 ### Frontend
 

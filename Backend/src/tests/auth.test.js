@@ -1,9 +1,15 @@
-const request = require("supertest");
-const app = require("../../app");
+const { visiteur } = require("./helpers");
+
+// Un visiteur (donc une adresse IP) par test : la limite de 10 requêtes
+// d'authentification par visiteur ne se cumule plus d'un test à l'autre.
+let api;
+beforeEach(() => {
+    api = visiteur();
+});
 
 describe("Auth — POST /api/auth/register", () => {
     it("crée un utilisateur avec succès", async () => {
-        const res = await request(app)
+        const res = await api
             .post("/api/auth/register")
             .send({ username: "ash", password: "pikachu123" });
 
@@ -12,11 +18,11 @@ describe("Auth — POST /api/auth/register", () => {
     });
 
     it("refuse un doublon de username", async () => {
-        await request(app)
+        await api
             .post("/api/auth/register")
             .send({ username: "ash", password: "pikachu123" });
 
-        const res = await request(app)
+        const res = await api
             .post("/api/auth/register")
             .send({ username: "ash", password: "autreMdp" });
 
@@ -27,13 +33,13 @@ describe("Auth — POST /api/auth/register", () => {
 
 describe("Auth — POST /api/auth/login", () => {
     beforeEach(async () => {
-        await request(app)
+        await api
             .post("/api/auth/register")
             .send({ username: "misty", password: "starmie" });
     });
 
     it("retourne un token avec des identifiants valides", async () => {
-        const res = await request(app)
+        const res = await api
             .post("/api/auth/login")
             .send({ username: "misty", password: "starmie" });
 
@@ -42,7 +48,7 @@ describe("Auth — POST /api/auth/login", () => {
     });
 
     it("refuse un mauvais mot de passe", async () => {
-        const res = await request(app)
+        const res = await api
             .post("/api/auth/login")
             .send({ username: "misty", password: "mauvais" });
 
@@ -51,7 +57,7 @@ describe("Auth — POST /api/auth/login", () => {
     });
 
     it("refuse un utilisateur inexistant", async () => {
-        const res = await request(app)
+        const res = await api
             .post("/api/auth/login")
             .send({ username: "inconnu", password: "xxx" });
 
@@ -64,11 +70,11 @@ describe("Auth — GET /api/auth/checkUser", () => {
     let token;
 
     beforeEach(async () => {
-        await request(app)
+        await api
             .post("/api/auth/register")
             .send({ username: "brock", password: "onix" });
 
-        const res = await request(app)
+        const res = await api
             .post("/api/auth/login")
             .send({ username: "brock", password: "onix" });
 
@@ -76,7 +82,7 @@ describe("Auth — GET /api/auth/checkUser", () => {
     });
 
     it("retourne l'utilisateur connecté avec un token valide", async () => {
-        const res = await request(app)
+        const res = await api
             .get("/api/auth/checkUser")
             .set("Authorization", `Bearer ${token}`);
 
@@ -85,13 +91,13 @@ describe("Auth — GET /api/auth/checkUser", () => {
     });
 
     it("refuse sans token", async () => {
-        const res = await request(app).get("/api/auth/checkUser");
+        const res = await api.get("/api/auth/checkUser");
 
         expect(res.status).toBe(401);
     });
 
     it("refuse avec un token invalide", async () => {
-        const res = await request(app)
+        const res = await api
             .get("/api/auth/checkUser")
             .set("Authorization", "Bearer tokenbidon");
 

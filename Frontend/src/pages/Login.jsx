@@ -66,6 +66,9 @@ export default function Login() {
                 <p className="auth-link">
                     Pas encore de compte ? <Link to="/register">S'inscrire</Link>
                 </p>
+                <p className="auth-notice centered">
+                    Les comptes restés un mois sans connexion sont supprimés.
+                </p>
             </div>
         </div>
     );

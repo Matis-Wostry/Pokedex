@@ -5,6 +5,9 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
+    // Dernière connexion réussie (à défaut, la création du compte). Sert à
+    // supprimer les comptes inactifs : voir services/accountPurgeService.js.
+    lastLoginAt: { type: Date, default: Date.now },
 });
 
 // Hash du mot de passe avant sauvegarde

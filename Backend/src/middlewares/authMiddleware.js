@@ -1,25 +1,24 @@
 const jwt = require("jsonwebtoken");
+const { TOKEN_LIFETIME } = require("../config/auth");
 const SECRET_KEY = process.env.SECRET_KEY;
 
+// Rien n'est écrit dans les journaux ici : ni le jeton (il suffirait à se
+// faire passer pour l'utilisateur), ni son contenu.
 const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
-    
-    console.log("🔍 Token reçu :", authHeader);
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        console.log("❌ Aucun token valide fourni");
         return res.status(401).json({ error: "Accès refusé. Aucun token valide fourni." });
     }
 
     const token = authHeader.split(" ")[1];
 
     try {
-        const decoded = jwt.verify(token, SECRET_KEY);
-        req.user = decoded;
-        console.log("✅ Utilisateur authentifié :", req.user);
+        // maxAge refuse aussi les anciens jetons, émis sans date d'expiration
+        // avant que la durée de vie soit limitée.
+        req.user = jwt.verify(token, SECRET_KEY, { maxAge: TOKEN_LIFETIME });
         next();
     } catch (error) {
-        console.log("❌ Erreur de décodage du token :", error.message);
         res.status(401).json({ error: "Token invalide" });
     }
 };

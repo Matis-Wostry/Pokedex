@@ -106,7 +106,7 @@ npm run dev
 | Méthode | Route | Description | Auth |
 |---------|-------|-------------|------|
 | POST | `/register` | Inscription | Non |
-| POST | `/login` | Connexion → retourne un JWT | Non |
+| POST | `/login` | Connexion → retourne un JWT valable 7 jours | Non |
 | GET | `/checkUser` | Vérifier l'utilisateur connecté | Oui |
 
 ### Pokémon — `/api/pkmn`
@@ -150,6 +150,9 @@ npm run dev
 | `username` | String | Unique, requis |
 | `password` | String | Hashé avec bcrypt |
 | `role` | String | `USER` (défaut) ou `ADMIN` |
+| `lastLoginAt` | Date | Dernière connexion réussie (à défaut, création du compte) |
+
+**Comptes inactifs.** Un compte resté 30 jours sans connexion est supprimé avec son profil de dresseur (`src/services/accountPurgeService.js`). La purge tourne au démarrage du serveur, puis une fois par jour. Les comptes `ADMIN` ne sont jamais purgés. La règle est annoncée sur l'écran d'inscription et dans la politique de confidentialité du site : changer la durée oblige à changer ces deux textes.
 
 ### Pokemon
 | Champ | Type | Description |
@@ -189,20 +192,17 @@ Le script `fetchPokemon.js` importe les 1025 Pokémon depuis [PokéAPI](https://
    ```js
    db.users.updateOne({ username: "ton_username" }, { $set: { role: "ADMIN" } })
    ```
-4. Renseigner le token dans `fetchPokemon.js` :
-   ```js
-   const TOKEN = 'ton_jwt_ici';
-   ```
-5. Lancer le script :
+4. Lancer le script en lui passant le token par la variable `POKEDEX_TOKEN` (jamais dans le fichier : le dépôt est public) :
    ```bash
-   node fetchPokemon.js
+   POKEDEX_TOKEN=ton_jwt_ici node fetchPokemon.js
    ```
+   Sous PowerShell : `$env:POKEDEX_TOKEN="ton_jwt_ici"; node fetchPokemon.js`
    > Durée estimée : ~20 min pour 1025 Pokémon (appels PokéAPI séquentiels pour les traductions françaises)
 
 ### Mettre à jour les noms français (si déjà importé en anglais)
 
 ```bash
-node updateFrenchNames.js
+POKEDEX_TOKEN=ton_jwt_ici node updateFrenchNames.js
 ```
 
 ---
