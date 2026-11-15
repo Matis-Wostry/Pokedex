@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPokemon } from '../api/pokemon';
 import { getTrainer, markPokemon } from '../api/trainer';
+import LegalNote from '../components/LegalNote';
 
 const TYPE_COLORS = {
     NORMAL: '#A8A878', FIRE: '#F08030', WATER: '#6890F0', GRASS: '#78C850',
@@ -262,6 +263,7 @@ export default function PokemonDetail() {
                     )}
                 </div>
             </div>
+            <LegalNote />
         </div>
     );
 }

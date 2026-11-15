@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register, login } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
+import LegalNote from '../components/LegalNote';
 
 export default function Register() {
     const [username, setUsername] = useState('');
@@ -97,6 +98,7 @@ export default function Register() {
                     Déjà un compte ? <Link to="/login">Se connecter</Link>
                 </p>
             </div>
+            <LegalNote />
         </div>
     );
 }

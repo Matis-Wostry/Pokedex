@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
+import LegalNote from '../components/LegalNote';
 
 export default function Login() {
     const [username, setUsername] = useState('');
@@ -70,6 +71,7 @@ export default function Login() {
                     Les comptes restés un mois sans connexion sont supprimés.
                 </p>
             </div>
+            <LegalNote />
         </div>
     );
 }

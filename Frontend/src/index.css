@@ -21,6 +21,7 @@ body {
 .auth-page {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -91,6 +92,18 @@ body {
 }
 .auth-notice.centered { margin-top: 1rem; text-align: center; }
 .auth-notice a { color: var(--text); }
+
+/* Statut du projet et crédit des marques, en bas de chaque écran (LegalNote.jsx) */
+.legal-note {
+    max-width: 480px;
+    margin: 1.5rem auto 1rem;
+    padding: 0 1rem;
+    font-size: .75rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    text-align: center;
+}
+.legal-note a { color: var(--text); }
 
 /* ── POKÉDEX ────────────────────────────────────── */
 .pokedex-header {

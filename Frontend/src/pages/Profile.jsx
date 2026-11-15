@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getTrainer, createTrainer, updateTrainer } from '../api/trainer';
+import LegalNote from '../components/LegalNote';
 
 const TOTAL_POKEMON = 1025;
 
@@ -155,6 +156,7 @@ export default function Profile() {
                         </div>
                     </div>
                 )}
+                <LegalNote />
             </main>
         </div>
     );

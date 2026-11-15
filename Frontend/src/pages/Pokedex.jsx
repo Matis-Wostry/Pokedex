@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { searchPokemon, getTypes } from '../api/pokemon';
 import { getTrainer } from '../api/trainer';
 import { useAuth } from '../context/AuthContext';
+import LegalNote from '../components/LegalNote';
 
 const GENERATIONS = [
     { value: '1', label: 'Génération I — Kanto' },
@@ -167,6 +168,7 @@ export default function Pokedex() {
 
                 <div ref={sentinelRef} style={{ height: 40 }} />
                 {loading && <div className="loading">Chargement...</div>}
+                <LegalNote />
             </main>
         </div>
     );
