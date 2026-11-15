@@ -37,7 +37,7 @@ export default function Register() {
         <div className="auth-page">
             <div className="auth-card">
                 <div className="auth-logo">
-                    <img src="/pokeball.svg" alt="Pokédex" />
+                    <img src="/pokeball.png" alt="Pokédex" />
                 </div>
                 <h1>Pokédex</h1>
                 <h2>Créer un compte</h2>

@@ -94,7 +94,7 @@ export default function Pokedex() {
             <header className="pokedex-header">
                 <div className="pokedex-header-inner">
                     <div className="pokedex-title">
-                        <img src="/pokeball.svg" alt="" className="header-logo" />
+                        <img src="/pokeball.png" alt="" className="header-logo" />
                         <h1>Pokédex</h1>
                     </div>
                     <div className="header-actions">

@@ -65,7 +65,7 @@ export default function Profile() {
             <header className="pokedex-header">
                 <div className="pokedex-header-inner">
                     <div className="pokedex-title">
-                        <img src="/pokeball.svg" alt="" className="header-logo" />
+                        <img src="/pokeball.png" alt="" className="header-logo" />
                         <h1>Profil Dresseur</h1>
                     </div>
                     <div className="header-actions">
@@ -99,7 +99,7 @@ export default function Profile() {
                 ) : (
                     <div className="profile-card">
                         <div className="profile-avatar">
-                            <img src={trainer.imgUrl || '/pokeball.svg'} alt="avatar" />
+                            <img src={trainer.imgUrl || '/pokeball.png'} alt="avatar" />
                         </div>
 
                         {editing ? (
